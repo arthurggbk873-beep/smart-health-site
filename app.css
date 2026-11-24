@@ -423,3 +423,16 @@ code { background: var(--soft); border-radius: 4px; padding: 1px 6px; font-size:
 }
 
 .icon-button svg { display: block; margin: auto; }
+
+/* comparação e modais no celular */
+.modal table.cmp { table-layout: fixed; width: 100%; }
+.modal .cmp th, .modal .cmp td { overflow-wrap: anywhere; }
+@media (max-width: 480px) {
+  .modal { padding: 20px 16px; }
+  .modal .cmp { font-size: 11.5px; }
+  .modal .cmp thead th { font-size: 12px; }
+  .modal .cmp tbody th { width: 4.4rem; font-size: 10px; letter-spacing: 0.3px; }
+  .modal .cmp th, .modal .cmp td { padding: 8px 4px; }
+}
+.modal .cmp thead th { white-space: normal; text-transform: none; letter-spacing: 0; overflow-wrap: anywhere; line-height: 1.25; vertical-align: bottom; }
+.modal .cmp thead th small { text-transform: none; letter-spacing: 0; }
