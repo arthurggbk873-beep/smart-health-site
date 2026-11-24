@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Smart Health: encontre o atendimento mais rápido na rede municipal de saúde." />
+    <title>Smart Health | Rede municipal de saúde</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body data-area="public" data-role="">
+    <div class="public-shell" id="publicShell">
+      <header class="pub-header">
+        <button class="pub-brand" data-pview="home" aria-label="Smart Health, início">
+          <span class="brand-mark" aria-hidden="true">+</span><span><strong>Smart</strong> Health</span>
+        </button>
+        <nav class="pub-nav" aria-label="Navegação do cidadão">
+          <button data-pview="home" class="active">Início</button>
+          <button data-pview="list" data-mode="list">Unidades</button>
+          <button data-pview="list" data-mode="map">Mapa</button>
+          <button data-pview="family">Acompanhar</button>
+          <button data-pview="notices">Avisos</button>
+        </nav>
+        <div class="pub-actions">
+          <button class="icon-button txt" id="pubLarge" title="Letra grande" aria-label="Letra grande" aria-pressed="false">A+</button>
+          <button class="icon-button" id="pubTheme" title="Alternar tema" aria-label="Alternar tema"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
+          <button class="button secondary" id="openLogin">Área restrita</button>
+        </div>
+      </header>
+      <div class="emergency" role="note">
+        <strong>⚠ Emergência?</strong> Ligue <b>192</b> (SAMU). Em risco de vida, não espere pelo site.
+      </div>
+      <main class="pub-main">
+        <section class="pview active" id="pview-home">
+          <div class="hero">
+            <div class="hero-copy">
+              <p class="eyebrow">REDE MUNICIPAL DE SAÚDE · VIÇOSA, MG</p>
+              <h1>Encontre o atendimento mais rápido perto de você</h1>
+              <p class="hero-sub">Veja a fila, o tempo de espera e a distância de cada unidade antes de sair de casa.</p>
+              <div class="finder">
+                <label class="field"
+                  ><span>Do que você precisa?</span
+                  ><select id="needSelect" aria-label="Do que você precisa?"></select
+                ></label>
+                <label class="field"
+                  ><span>Onde você está?</span
+                  ><select id="originSelect" aria-label="Onde você está?"></select
+                ></label>
+                <button class="button primary btn-lg" id="useLocation">◎ Usar minha localização</button>
+              </div>
+              <p class="hint" id="originHint">Localização simulada para a demonstração.</p>
+              <div class="home-stats" id="homeStats"></div>
+            </div>
+            <div class="hero-result" id="homeResult"></div>
+          </div>
+        </section>
+        <section class="pview" id="pview-list">
+          <div class="pub-heading">
+            <div>
+              <p class="eyebrow">SITUAÇÃO DAS UNIDADES</p>
+              <h1 id="listTitle">Unidades de saúde</h1>
+              <p class="muted" id="listSub">Compare filas, espera e lotação e escolha onde ir.</p>
+            </div>
+            <div class="seg" role="group" aria-label="Modo de visualização">
+              <button data-mode="list" class="active">Lista</button><button data-mode="map">Mapa</button>
+            </div>
+          </div>
+          <div class="pub-filters">
+            <div class="chips" id="typeChips" role="group" aria-label="Tipo de unidade">
+              <button data-type="all" class="active">Todas</button><button data-type="ubs">UBS</button
+              ><button data-type="upa">UPA</button><button data-type="hospital">Hospital</button>
+            </div>
+            <select id="listNeed" aria-label="Especialidade ou tipo de atendimento"></select>
+            <select id="listSort" aria-label="Ordenar por">
+              <option value="best">Melhor opção agora</option>
+              <option value="wait">Menor espera</option>
+              <option value="dist">Mais perto</option>
+              <option value="queue">Menor fila</option>
+            </select>
+            <label class="check"><input type="checkbox" id="listUrgent" /> Só urgência</label>
+          </div>
+          <div id="listBody"></div>
+        </section>
+        <section class="pview" id="pview-family">
+          <div class="pub-heading">
+            <div>
+              <p class="eyebrow">FAMILIAR OU RESPONSÁVEL</p>
+              <h1>Acompanhar um atendimento</h1>
+              <p class="muted">Vincule o código informado pela recepção e veja o status à distância.</p>
+            </div>
+          </div>
+          <div class="two-col">
+            <form class="panel pad" id="linkForm">
+              <h2>Vincular paciente</h2>
+              <label class="field"><span>Código do atendimento</span><input id="linkCode" placeholder="SH-0000" autocomplete="off" required /></label>
+              <label class="field"><span>Seu nome (opcional)</span><input id="linkName" placeholder="Quem está acompanhando" autocomplete="off" /></label>
+              <button class="button primary btn-lg">Vincular</button>
+              <p class="hint">O código é entregue pela recepção na chegada. Para testar a demonstração, use <b>SH-4821</b>.</p>
+            </form>
+            <div id="familyList"></div>
+          </div>
+        </section>
+        <section class="pview" id="pview-notices">
+          <div class="pub-heading">
+            <div>
+              <p class="eyebrow">AVISOS POR WHATSAPP OU SMS</p>
+              <h1>Receba avisos das unidades</h1>
+              <p class="muted">Ausência de médico e mudanças no atendimento chegam direto no celular.</p>
+            </div>
+          </div>
+          <div class="two-col">
+            <form class="panel pad" id="subForm">
+              <h2>Quero receber avisos</h2>
+              <label class="field"><span>Nome</span><input id="subName" placeholder="Seu nome" required /></label>
+              <label class="field"><span>Celular</span><input id="subPhone" placeholder="(31) 90000-0000" inputmode="tel" required /></label>
+              <div class="field"><span>Canal</span>
+                <div class="seg" id="subChannel" role="group"><button type="button" data-ch="WhatsApp" class="active">WhatsApp</button><button type="button" data-ch="SMS">SMS</button></div>
+              </div>
+              <div class="field"><span>De quais unidades?</span><div class="check-list" id="subUnits"></div></div>
+              <button class="button primary btn-lg">Inscrever-se</button>
+              <p class="hint">Demonstração: nenhuma mensagem real é enviada.</p>
+            </form>
+            <div id="inbox"></div>
+          </div>
+        </section>
+      </main>
+      <div class="compare-bar" id="compareBar" hidden></div>
+      <footer class="pub-footer">Smart Health · Projeto de Engenharia de Software I (ADS300), Univiçosa · dados de demonstração</footer>
+    </div>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">+</span
+          ><span><strong>Smart</strong> Health<small id="brandSub">Gestão municipal</small></span>
+        </div>
+        <div class="nav-group" data-role="gestao">
+          <div class="workspace-label">PAINEL OPERACIONAL</div>
+          <nav class="main-nav" aria-label="Navegação da gestão">
+            <button class="nav-link active" data-view="dashboard"><span class="nav-icon">▦</span> Visão geral</button>
+            <button class="nav-link" data-view="alerts"><span class="nav-icon">△</span> Alertas</button>
+            <button class="nav-link" data-view="units"><span class="nav-icon">⌂</span> Unidades de saúde</button>
+            <button class="nav-link" data-view="queue"><span class="nav-icon">≡</span> Gestão de filas</button>
+            <button class="nav-link" data-view="analytics"><span class="nav-icon">▥</span> Demanda e picos</button>
+            <button class="nav-link" data-view="notices"><span class="nav-icon">✉</span> Avisos</button>
+            <button class="nav-link" data-view="import"><span class="nav-icon">⇪</span> Importar histórico</button>
+            <button class="nav-link" data-view="history"><span class="nav-icon">◷</span> Histórico</button>
+          </nav>
+        </div>
+        <div class="nav-group" data-role="unidade">
+          <div class="workspace-label">RECEPÇÃO DA UNIDADE</div>
+          <nav class="main-nav" aria-label="Navegação da unidade">
+            <button class="nav-link active" data-view="unit"><span class="nav-icon">▦</span> Painel da unidade</button>
+            <button class="nav-link" data-view="notices"><span class="nav-icon">✉</span> Avisos aos cidadãos</button>
+          </nav>
+        </div>
+        <div class="sidebar-bottom">
+          <div class="city-context">
+            <span class="status-dot online"></span>
+            <div><strong>Viçosa, MG</strong><small>Rede conectada</small></div>
+          </div>
+          <button class="nav-link only-gestao" data-view="settings"><span class="nav-icon">⚙</span> Preferências</button>
+          <button class="nav-link" id="logoutButton"><span class="nav-icon">⎋</span> Sair para o site do cidadão</button>
+        </div>
+      </aside>
+      <main class="main-area">
+        <header class="topbar">
+          <button class="mobile-menu" id="mobileMenu" aria-label="Abrir menu">☰</button>
+          <div class="breadcrumb">
+            <span>Smart Health</span><b>/</b><strong id="breadcrumbTitle">Visão geral</strong>
+          </div>
+          <div class="topbar-actions">
+            <span class="last-sync" id="lastSync">Atualizado agora</span
+            ><button
+              class="icon-button"
+              id="themeToggle"
+              title="Alternar tema"
+              aria-label="Alternar tema"
+            ><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button
+            ><button
+              class="icon-button"
+              id="refreshButton"
+              title="Atualizar dados"
+              aria-label="Atualizar dados"
+            >
+              ↻</button
+            ><button
+              class="icon-button notification-button"
+              id="notificationButton"
+              title="Ver alertas"
+              aria-label="Ver alertas"
+            >
+              ♧<i id="notificationCount">0</i>
+            </button>
+            <div class="profile">
+              <span class="avatar" id="profileAvatar">AM</span
+              ><span class="profile-copy"
+                ><strong id="profileName">Admin Municipal</strong><small id="profileRole">Gestor da rede</small></span
+              >
+            </div>
+          </div>
+        </header>
+        <div class="content-wrap">
+          <section class="view active" id="view-dashboard" data-title="Visão geral">
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow" id="dashDate">HOJE</p>
+                <h1>Visão geral da rede</h1>
+                <p class="muted">
+                  Acompanhe a operação das unidades e tome decisões com base na situação atual.
+                </p>
+              </div>
+              <button class="button primary" id="openUnitFromDashboard">+ Cadastrar unidade</button>
+            </div>
+            <div class="kpi-grid" id="kpiGrid"></div>
+            <div class="dashboard-grid">
+              <section class="panel queue-panel">
+                <div class="panel-header">
+                  <div>
+                    <h2>Onde há menos fila</h2>
+                    <p>Unidades em atendimento, ordenadas da menor para a maior fila</p>
+                  </div>
+                  <button class="text-button" data-view-target="queue">Gerenciar filas →</button>
+                </div>
+                <div class="queue-legend">
+                  <span><i class="legend-dot low"></i>Baixa</span
+                  ><span><i class="legend-dot medium"></i>Moderada</span
+                  ><span><i class="legend-dot high"></i>Alta</span
+                  ><span><i class="legend-dot crit"></i>Lotada</span>
+                </div>
+                <div id="queueBars" class="queue-bars"></div>
+              </section>
+              <section class="panel alert-panel">
+                <div class="panel-header">
+                  <div>
+                    <h2>Alertas operacionais</h2>
+                    <p>Situações que pedem atenção da equipe</p>
+                  </div>
+                  <span class="panel-counter" id="alertCounter">0</span>
+                </div>
+                <div id="alertList" class="alert-list"></div>
+              </section>
+            </div>
+            <section class="panel table-panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Situação das unidades</h2>
+                  <p>Visão rápida da capacidade de atendimento</p>
+                </div>
+                <button class="button secondary" data-view-target="units">Acessar unidades</button>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Unidade</th>
+                      <th>Tipo</th>
+                      <th>Status</th>
+                      <th>Fila</th>
+                      <th>Espera estimada</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboardUnitRows"></tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+          <section class="view" id="view-units" data-title="Unidades de saúde">
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">CADASTRO E MONITORAMENTO</p>
+                <h1>Unidades de saúde</h1>
+                <p class="muted">
+                  Mantenha a rede municipal atualizada e acompanhe a capacidade de cada unidade.
+                </p>
+              </div>
+              <button class="button primary" id="openUnitButton">+ Nova unidade</button>
+            </div>
+            <div class="toolbar">
+              <label class="search-field"
+                ><span>⌕</span
+                ><input
+                  id="unitSearch"
+                  type="search"
+                  placeholder="Buscar por nome, endereço ou serviço" /></label
+              ><select id="unitTypeFilter" aria-label="Filtrar por tipo">
+                <option value="all">Todos os tipos</option>
+                <option value="ubs">UBS</option>
+                <option value="hospital">Hospital</option>
+                <option value="upa">UPA</option></select
+              ><select id="unitStatusFilter" aria-label="Filtrar por status">
+                <option value="all">Todos os status</option>
+                <option value="open">Em atendimento</option>
+                <option value="attention">Atenção</option>
+                <option value="closed">Fechada</option>
+              </select>
+            </div>
+            <div class="results-meta">
+              <span id="unitResultsCount">0 unidades</span
+              ><button class="text-button" id="clearFilters">Limpar filtros</button>
+            </div>
+            <div class="unit-grid" id="unitGrid"></div>
+          </section>
+          <section class="view" id="view-queue" data-title="Gestão de filas">
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">ATUALIZAÇÃO OPERACIONAL</p>
+                <h1>Gestão de filas</h1>
+                <p class="muted">
+                  Ajuste a fila de cada unidade. O tempo estimado é recalculado automaticamente.
+                </p>
+              </div>
+              <span class="live-tag"
+                ><span class="status-dot online"></span> Atualização local</span
+              >
+            </div>
+            <div class="info-banner">
+              <span class="info-symbol">i</span>
+              <div>
+                <strong>Como funciona</strong>
+                <p>
+                  O tempo estimado considera a fila atual e a capacidade média de atendimento
+                  registrada para cada unidade.
+                </p>
+              </div>
+            </div>
+            <div class="queue-management" id="queueManagement"></div>
+          </section>
+          <section class="view" id="view-alerts" data-title="Alertas">
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">SOBRECARGA DA REDE</p>
+                <h1>Alertas de sobrecarga</h1>
+                <p class="muted">O sistema gera e registra um alerta quando uma unidade atinge o limite de capacidade.</p>
+              </div>
+              <button class="button secondary" data-view-target="settings" data-only="gestao">Ajustar limite</button>
+            </div>
+            <div id="alertSummary" class="kpi-grid"></div>
+            <section class="panel table-panel"><div class="panel-header"><div><h2>Registro de alertas</h2><p>Mais recentes primeiro. Os mais antigos são dados de demonstração.</p></div></div><div class="table-scroll" id="alertTable"></div></section>
+          </section>
+          <section class="view" id="view-analytics" data-title="Demanda e picos">
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">PAINEL DA REDE DE SAÚDE</p>
+                <h1>Demanda e horários de pico</h1>
+                <p class="muted">Indicadores, histórico de demanda e padrões para apoiar o planejamento. Dados de demonstração.</p>
+              </div>
+              <div class="head-actions">
+                <select id="anUnit" aria-label="Unidade"></select>
+                <button class="button primary" id="exportCsv">Exportar relatório (CSV)</button>
+              </div>
+            </div>
+            <div class="kpi-grid" id="anKpis"></div>
+            <div class="grid-2">
+              <section class="panel"><div class="panel-header"><div><h2>Padrões identificados</h2><p>Calculados a partir do histórico</p></div></div><div class="pad-body" id="anPatterns"></div></section>
+              <section class="panel"><div class="panel-header"><div><h2>Mapa de lotação</h2><p>Situação atual da rede</p></div></div><div class="pad-body" id="anMap"></div></section>
+            </div>
+            <div class="grid-2">
+              <section class="panel"><div class="panel-header"><div><h2>Histórico de demanda</h2><p>Atendimentos por dia</p></div></div><div class="pad-body" id="anHistory"></div></section>
+              <section class="panel"><div class="panel-header"><div><h2>Comparação entre unidades</h2><p>Ocupação atual de cada uma</p></div></div><div class="pad-body" id="anCompare"></div></section>
+            </div>
+            <section class="panel"><div class="panel-header"><div><h2>Horários de pico</h2><p>Média de atendimentos por dia da semana e hora</p></div></div><div class="pad-body" id="anHeat"></div></section>
+            <section class="panel table-panel mt"><div class="panel-header"><div><h2>Indicadores por unidade</h2><p>Visão consolidada da rede</p></div></div><div class="table-scroll" id="anTable"></div></section>
+          </section>
+          <section class="view" id="view-notices" data-title="Avisos">
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">WHATSAPP E SMS</p>
+                <h1>Avisos aos cidadãos</h1>
+                <p class="muted">Comunique ausência de médico, mudanças no atendimento e campanhas. A entrega é simulada.</p>
+              </div>
+            </div>
+            <div class="grid-2 wide-left">
+              <div id="noticeComposer"></div>
+              <section class="panel"><div class="panel-header"><div><h2>Avisos enviados</h2><p>Registro das últimas mensagens</p></div></div><div class="pad-body" id="noticeLog"></div></section>
+            </div>
+          </section>
+          <section class="view" id="view-import" data-title="Importar histórico">
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">MIGRAÇÃO DO SISTEMA ANTIGO</p>
+                <h1>Importar histórico de atendimentos</h1>
+                <p class="muted">Traga o histórico do sistema usado hoje pela prefeitura para a base do Smart Health.</p>
+              </div>
+            </div>
+            <div id="importBox"></div>
+          </section>
+          <section class="view" id="view-unit" data-title="Painel da unidade">
+            <div id="unitPanel"></div>
+          </section>
+          <section class="view" id="view-history" data-title="Histórico">
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">RASTREABILIDADE</p>
+                <h1>Histórico de alterações</h1>
+                <p class="muted">Acompanhe as atualizações realizadas no painel.</p>
+              </div>
+              <button class="button secondary" id="clearHistory">Limpar histórico</button>
+            </div>
+            <div class="panel history-panel"><div id="historyList"></div></div>
+          </section>
+          <section class="view" id="view-settings" data-title="Preferências">
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">CONFIGURAÇÃO DO AMBIENTE</p>
+                <h1>Preferências</h1>
+                <p class="muted">Configurações locais para a demonstração do projeto.</p>
+              </div>
+            </div>
+            <div class="settings-grid">
+              <div class="panel setting-card">
+                <span class="setting-icon">△</span>
+                <div>
+                  <h2>Alerta de sobrecarga</h2>
+                  <p>Define quando o sistema gera e registra o alerta de uma unidade.</p>
+                </div>
+                <select id="overloadSelect" aria-label="Limite do alerta de sobrecarga">
+                  <option value="1">100% da capacidade planejada</option>
+                  <option value="0.9">90% da capacidade (lotada)</option>
+                </select>
+              </div>
+              <div class="panel setting-card">
+                <span class="setting-icon">⌁</span>
+                <div>
+                  <h2>Tempo de atualização</h2>
+                  <p>
+                    O painel usa os dados salvos neste navegador. Atualizações são registradas no
+                    histórico.
+                  </p>
+                </div>
+                <span class="setting-value">LocalStorage</span>
+              </div>
+              <div class="panel setting-card">
+                <span class="setting-icon">⌂</span>
+                <div>
+                  <h2>Município monitorado</h2>
+                  <p>Viçosa, Minas Gerais</p>
+                </div>
+                <button class="button secondary" id="resetDemo">Restaurar demonstração</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button class="modal-close" id="modalClose" aria-label="Fechar">×</button>
+        <div id="modalContent"></div>
+      </div>
+    </div>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+    <script src="public.js"></script>
+    <script src="restricted.js"></script>
+  </body>
+</html>
