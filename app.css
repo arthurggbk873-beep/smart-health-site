@@ -436,3 +436,8 @@ code { background: var(--soft); border-radius: 4px; padding: 1px 6px; font-size:
 }
 .modal .cmp thead th { white-space: normal; text-transform: none; letter-spacing: 0; overflow-wrap: anywhere; line-height: 1.25; vertical-align: bottom; }
 .modal .cmp thead th small { text-transform: none; letter-spacing: 0; }
+
+/* cabeçalho do cidadão fixo no topo também no celular (overflow hidden quebra o sticky) */
+@media (max-width: 800px) {
+  html, body { overflow-x: clip !important; }
+}
